@@ -46,12 +46,10 @@ class _FocusPoint(object):
     """
     Return a transformed, uniform grid, focused in the x- or
     y-direction.
-
     This class may be called with a uniform grid, with limits from
     [0, 1]. To create a focused grid in the ``axis`` direction centered
     about ``pos``. The output grid is also uniform from [0, 1] in both
     x and y.
-
     Parameters
     ----------
     pos : float
@@ -65,22 +63,20 @@ class _FocusPoint(object):
         region.
     extent : float
         Lateral extent of focused region.
-
-
     Returns
     -------
     foc : class
         The class may be called with vertex/node positions of a grid.
         The returned transformed grid (x, y) will be focused as per the
         parameters listed above.
-
     """
 
-    def __init__(self, pos, axis, factor, extent):
+    def __init__(self, pos, axis, factor, extent,debug):
         self.pos = pos
         self.axis = axis.lower()
         self.factor = factor
         self.extent = extent
+        self.debug = debug
 
         if self.pos > 1.0 or self.pos < 0:
             raise ValueError('`pos` must be within the range [0, 1]')
@@ -98,6 +94,33 @@ class _FocusPoint(object):
         f1 = self._reposition_point(1.0)
         return (self._reposition_point(array) - f0) / (f1 - f0)
 
+    def _debug_focus(self,array,debug,axis):
+        print(array)
+        temps = 0
+        res = []
+        s = sum(debug)
+        h = len(array)
+        w = len(array[0])
+        for i in range(len(debug)):
+            temps += debug[i]
+            res.append(temps/s)
+        res = [0.0] + res
+
+        if axis == 'y':
+            mesh = []
+            for tmp in res:
+                mesh.append([tmp]*w)
+            #print('new')
+            #print(numpy.array(mesh))
+            return numpy.array(mesh)
+        if axis == 'x':
+            mesh = []
+            for tmp in res:
+                mesh.append([tmp]*h)
+            #print('new')
+            #print(numpy.array(mesh).T)
+            return numpy.array(mesh).T
+
     def __call__(self, x, y):
         x = numpy.asarray(x)
         y = numpy.asarray(y)
@@ -108,47 +131,46 @@ class _FocusPoint(object):
                 raise ValueError('y must be within the range [0, 1]')
 
         if self.axis == 'y':
-            return x, self._do_focus(y)
+            if len(self.debug)==0:
+                return x, self._do_focus(y)
+            else:
+                return x, self._debug_focus(y,self.debug,self.axis)
+
 
         elif self.axis == 'x':
-            return self._do_focus(x), y
+            if len(self.debug)==0:
+                return self._do_focus(x), y
+            else:
+                return self._debug_focus(x,self.debug,self.axis), y
+
 
 
 class Focus(object):
     """
     Return a container for a sequence of Focus objects.
-
     The sequence is populated by using :meth:`~add_focus`, which defines
     a point (``xo`` or ``yo``), around which the grid is focused by a
     `factor` for the provided ``extent`` in the along the given
     ``axis``. The region of focusing will be approximately Gaussian,
     and the resolution will be increased by approximately the value of
     ``factor``.
-
     Calls to the object return transformed coordinates:
-
     .. code-block:: python
-
        xf, yf = foc(x, y)
-
     where `x` and `y` must be within [0, 1], and are typically a
     uniform, normalized grid. The focused grid will be the result of
     applying each of the focus elements in the sequence they are added
     to the series.
-
     Parameters
     ----------
     None
-
     Examples
     --------
     >>> foc = pygridgen.Focus()
     >>> foc.add_focus(0.2, axis='x', factor=3.0, extent=0.20)
     >>> foc.add_focus(0.6, axis='y', factor=5.0, extent=0.35)
-
     >>> x, y = numpy.mgrid[0:1:3j, 0:1:3j]
     >>> xf, yf = foc(x, y)
-
     >>> print(xf)
     [[ 0.          0.          0.        ]
      [ 0.36594617  0.36594617  0.36594617]
@@ -157,19 +179,16 @@ class Focus(object):
     [[ 0.          0.62479833  1.        ]
      [ 0.          0.62479833  1.        ]
      [ 0.          0.62479833  1.        ]]
-
     """
 
     def __init__(self, *foci):
         self._focuspoints = list(foci)
 
-    def add_focus(self, pos, axis, factor=2.0, extent=0.1):
+    def add_focus(self, pos, axis, factor=2.0, extent=0.1,debug = []):
         """
         Add a single point of focus along an axis.
-
         This adds a focused location to a grid and can be called multiple
         times in either the x- or y-direction.
-
         Parameters
         ----------
         pos : float
@@ -183,17 +202,15 @@ class Focus(object):
             region.
         extent : float
             Lateral extent of focused region.
-
         """
 
-        self._focuspoints.append(_FocusPoint(pos, axis, factor, extent))
+        self._focuspoints.append(_FocusPoint(pos, axis, factor, extent,debug))
 
     def __call__(self, x, y):
         """docstring for __call__"""
         for focuspoint in self._focuspoints:
             x, y = focuspoint(x, y)
         return x, y
-
 
 class CGrid(object):
     """
