@@ -23,13 +23,29 @@ see the documentation for `pygridtools`_.
 Install
 -------
 cd pygridgen
+
+
 cd external/nn; ./configure ;sudo make install
+
+
 cd external/csa; ./configure ;sudo make install
+
+
 cd external/gridutils; ./configure ;sudo make install
+
+
 cd ..
+
+
 cd gridgen; ./configure ;sudo make shlib
+
+
 cd ..
+
+
 cd ..
+
+
 cd pygridgen; python setup.py install
 
 
