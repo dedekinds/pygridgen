@@ -46,7 +46,7 @@ cd ..
 cd ..
 
 
-cd pygridgen; python setup.py install
+python setup.py install
 
 
 
