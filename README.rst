@@ -20,6 +20,20 @@ see the documentation for `pygridtools`_.
 .. _pygridtools: https://phobson.github.io/pygridtools
 
 
+Install
+-------
+cd pygridgen
+cd external/nn; ./configure ;sudo make install
+cd external/csa; ./configure ;sudo make install
+cd external/gridutils; ./configure ;sudo make install
+cd ..
+cd gridgen; ./configure ;sudo make shlib
+cd ..
+cd ..
+cd pygridgen; python setup.py install
+
+
+
 Credits
 -------
 This fork of ``pygridgen`` stands on the very tall shoulders of `Robert Hetland`_ of Texas A&M University.
