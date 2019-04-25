@@ -1,0 +1,10 @@
+import os
+os.system(cd pygridgen)
+os.system(cd external/nn; ./configure ;sudo make install)
+os.system(cd external/csa; ./configure ;sudo make install)
+os.system(cd external/gridutils; ./configure ;sudo make install)
+os.system(cd ..)
+os.system(cd gridgen; ./configure ;sudo make shlib)
+os.system(cd ..)
+os.system(cd ..)
+os.system(cd pygridgen; python setup.py install)
